@@ -356,25 +356,18 @@ def sign_in(
     driver.implicitly_wait(1)  # seconds
     count = 0
     while not driver.current_url.startswith("{}/".format(url)):
-        try:  # try to enter in credentials if username and password are on same page
-            handle_same_page_username_password(driver, email, password)
+        try:  # try to enter in credentials if username and password are on different pages
+            handle_different_page_username_password(driver, email)
+            driver.implicitly_wait(5)  # seconds
+            password_page(driver, password)
         except (
             ElementNotInteractableException,
             ElementNotVisibleException,
             NoSuchElementException,
         ):
-            try:  # try to enter in credentials if username and password are on different pages
-                handle_different_page_username_password(driver, email)
-                driver.implicitly_wait(5)  # seconds
-                password_page(driver, password)
-            except (
-                ElementNotInteractableException,
-                ElementNotVisibleException,
-                NoSuchElementException,
-            ):
-                # no need to enter credentials, likely alreadly logged in
-                pass
-            driver.implicitly_wait(1)  # seconds
+            # no need to enter credentials, likely alreadly logged in
+            pass
+        driver.implicitly_wait(1)  # seconds
 
         # Wait until logged in, just in case we need to deal with MFA.
 
